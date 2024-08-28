@@ -1,0 +1,35 @@
+local player = game.Players.LocalPlayer
+local clicks = player:WaitForChild("leaderstats"):WaitForChild("Clicks")
+local rebirthButton = script.Parent
+
+local initialRebirthCost = 100 -- Initial rebirth cost
+local rebirthMultiplier = 1.3 -- Multiplier for each subsequent rebirth
+
+-- Retrieve rebirths and prestige values
+local rebirths = player:WaitForChild("Rebirths")
+local prestige = player:WaitForChild("Prestige")
+
+-- Initialize rebirth cost
+if not player:FindFirstChild("RebirthCost") then
+    local rebirthCost = Instance.new("IntValue")
+    rebirthCost.Name = "RebirthCost"
+    rebirthCost.Value = initialRebirthCost
+    rebirthCost.Parent = player
+end
+
+local rebirthCost = player:FindFirstChild("RebirthCost")
+
+rebirthButton.MouseButton1Click:Connect(function()
+    if clicks.Value >= rebirthCost.Value then
+        clicks.Value = 0
+        if prestige.Value > 0 then
+            rebirths.Value = rebirths.Value + 10 -- Grant 10 rebirths if a player has prestiged
+        else
+            rebirths.Value = rebirths.Value + 1 -- Standard rebirths
+        end
+        rebirthCost.Value = math.ceil(rebirthCost.Value * rebirthMultiplier) -- Increase rebirth cost
+        print("Rebirth successful! Total Rebirths: " .. rebirths.Value)
+    else
+        print("Not enough clicks to rebirth!")
+    end
+end)

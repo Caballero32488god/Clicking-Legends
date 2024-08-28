@@ -1,0 +1,52 @@
+local Players = game:GetService("Players")
+local Chat = game:GetService("Chat")
+
+-- Define prestige rank names
+local prestigeRanks = {
+    "Rookie", "Warrior", "Strategist", "Vanguard", 
+    "Overlord", "Dynamo", "Savage", "Legendary", 
+    "Mythic", "Champion"
+}
+
+-- Function to update the chat rank based on prestige
+local function updateChatRank(player)
+    local prestigeLevel = player:FindFirstChild("Prestige")
+    if prestigeLevel and prestigeLevel.Value > 0 and prestigeLevel.Value <= #prestigeRanks then
+        local rankName = prestigeRanks[prestigeLevel.Value]
+        
+        -- Update player's chat rank
+        Chat:SetPlayerAttribute(player, "ChatRank", rankName)
+        
+        print("Updated chat rank for " .. player.Name .. " to " .. rankName)
+    else
+        -- Default rank if prestige level is out of bounds
+        Chat:SetPlayerAttribute(player, "ChatRank", "No Prestige")
+    end
+end
+
+-- Update chat ranks when a player joins
+Players.PlayerAdded:Connect(function(player)
+    -- Initialize Prestige if not already present
+    if not player:FindFirstChild("Prestige") then
+        local prestige = Instance.new("IntValue")
+        prestige.Name = "Prestige"
+        prestige.Value = 0
+        prestige.Parent = player
+    end
+
+    -- Update chat rank on player join
+    updateChatRank(player)
+end)
+
+-- Update chat ranks when a player's prestige changes
+local function onPrestigeChanged(player, newValue)
+    updateChatRank(player)
+end
+
+-- Listen for changes to prestige value
+Players.PlayerAdded:Connect(function(player)
+    local prestige = player:WaitForChild("Prestige")
+    prestige.Changed:Connect(function()
+        onPrestigeChanged(player, prestige.Value)
+    end)
+end)
